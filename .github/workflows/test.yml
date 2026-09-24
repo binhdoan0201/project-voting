@@ -16,7 +16,10 @@ jobs:
           node-version: 20
 
       - name: Cai dat dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Vá quyền thực thi cho node_modules/.bin
+        run: chmod -R +x node_modules/.bin
 
       - name: Compile contract
         run: npx hardhat compile
