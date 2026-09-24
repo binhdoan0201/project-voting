@@ -1,0 +1,30 @@
+name: Compile & Test
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cai dat Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cai dat dependencies
+        run: npm ci
+
+      - name: Vá quyền thực thi cho node_modules/.bin
+        run: chmod -R +x node_modules/.bin
+
+      - name: Compile contract
+        run: npx hardhat compile
+
+      - name: Chay test
+        run: npx hardhat test
+        
+        
