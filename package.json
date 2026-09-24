@@ -1,28 +1,14 @@
 {
-  "name": "project-voting",
+  "name": "Create a JavaScript project",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "test": "test"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/binhdoan0201/project-voting.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/binhdoan0201/project-voting/issues"
-  },
-  "homepage": "https://github.com/binhdoan0201/project-voting#readme",
+  "type": "module",
   "devDependencies": {
-    "hardhat": "^3.17.0"
+    "@nomicfoundation/hardhat-ignition": "^3.1.8",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.7",
+    "@types/node": "^22.20.4",
+    "forge-std": "github:foundry-rs/forge-std#v1.16.2",
+    "hardhat": "^3.17.0",
+    "typescript": "~6.0.3",
+    "viem": "^2.56.8"
   }
 }
