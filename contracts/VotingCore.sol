@@ -27,7 +27,11 @@ contract VotingCore {
     // ==========================================
     // 5. Constructor
     // ==========================================
-    constructor(address _candidateManagerAddress, address _electionSchedulerAddress, address _voterRegistryAddress) {
+    constructor(
+        address _candidateManagerAddress,
+        address _electionSchedulerAddress,
+        address _voterRegistryAddress
+    ) {
         admin = msg.sender;
         candidateManager = CandidateManager(_candidateManagerAddress);
         electionScheduler = ElectionScheduler(_electionSchedulerAddress);
@@ -42,12 +46,12 @@ contract VotingCore {
     /// @param _candidateId ID của ứng viên trong mảng candidates
     /// @dev Điều kiện là cuộc bầu cử đang diễn ra và cử tri chưa bầu
     function vote(uint _candidateId) public {
-        require(voterRegistry.isRegistered(msg.sender), "Ban chua duoc dang ky de bo phieu");
+        require(voterRegistry.isRegistered(msg.sender), "Cu tri chua duoc dang ky");
         require(electionScheduler.isElectionActive(), "Cuoc bau cu chua bat dau hoac da ket thuc");
         require(!hasVoted[msg.sender], "Ban da tham gia bau cu roi");
-        
+
         candidateManager.incrementVote(_candidateId);
-        
+
         hasVoted[msg.sender] = true;
         totalVotesCast++;
 
