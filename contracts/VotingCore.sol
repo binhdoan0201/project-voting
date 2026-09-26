@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 // 1. Pragma & import
 import "./CandidateManager.sol";
 import "./ElectionScheduler.sol";
+import "./VoterRegistry.sol";
 
 contract VotingCore {
     
@@ -12,6 +13,7 @@ contract VotingCore {
     // ==========================================
     CandidateManager public candidateManager;
     ElectionScheduler public electionScheduler;
+    VoterRegistry public voterRegistry;
 
     address public admin;
     mapping(address => bool) public hasVoted;
@@ -25,10 +27,11 @@ contract VotingCore {
     // ==========================================
     // 5. Constructor
     // ==========================================
-    constructor(address _candidateManagerAddress, address _electionSchedulerAddress) {
+    constructor(address _candidateManagerAddress, address _electionSchedulerAddress, address _voterRegistryAddress) {
         admin = msg.sender;
         candidateManager = CandidateManager(_candidateManagerAddress);
         electionScheduler = ElectionScheduler(_electionSchedulerAddress);
+        voterRegistry = VoterRegistry(_voterRegistryAddress);
     }
 
     // ==========================================
@@ -39,6 +42,7 @@ contract VotingCore {
     /// @param _candidateId ID của ứng viên trong mảng candidates
     /// @dev Điều kiện là cuộc bầu cử đang diễn ra và cử tri chưa bầu
     function vote(uint _candidateId) public {
+        require(voterRegistry.isRegistered(msg.sender), "Ban chua duoc dang ky de bo phieu");
         require(electionScheduler.isElectionActive(), "Cuoc bau cu chua bat dau hoac da ket thuc");
         require(!hasVoted[msg.sender], "Ban da tham gia bau cu roi");
         
