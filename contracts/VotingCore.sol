@@ -46,8 +46,8 @@ contract VotingCore {
     /// @param _candidateId ID của ứng viên trong mảng candidates
     /// @dev Điều kiện là cuộc bầu cử đang diễn ra và cử tri chưa bầu
     function vote(uint _candidateId) public {
-        require(electionScheduler.isElectionActive(), "Cuoc bau cu chua bat dau hoac da ket thuc");
         require(voterRegistry.isRegistered(msg.sender), "Cu tri chua duoc dang ky");
+        require(electionScheduler.isElectionActive(), "Cuoc bau cu chua bat dau hoac da ket thuc");
         require(!hasVoted[msg.sender], "Ban da tham gia bau cu roi");
 
         candidateManager.incrementVote(_candidateId);
