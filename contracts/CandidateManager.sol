@@ -58,17 +58,20 @@ contract CandidateManager {
     // 6. External/public functions
     // ==========================================
 
-    /// @notice CÃ i Ä‘áº·t Ä‘á»‹a chá»‰ cho Voting Core contract
-    /// @param _coreAddress Äá»‹a chá»‰ cá»§a VotingCore contract
-    function setVotingCore(address _coreAddress) public onlyAdmin {
+    /// @notice Cài đặt địa chỉ cho Voting Core contract
+    /// @param _coreAddress Địa chỉ của VotingCore contract
+    /// @dev Chỉ đặt/đổi được khi danh sách ứng viên CHƯA khóa. Sau lockCandidates() thì cố định
+    ///      vĩnh viễn (startElection bắt buộc đã khóa), nên admin không thể đổi Core giữa cuộc bầu.
+    function setVotingCore(address _coreAddress) public onlyAdmin candidatesNotLocked {
+        require(_coreAddress != address(0), "Dia chi Core khong hop le");
         votingCoreAddress = _coreAddress;
         emit CoreContractSet(_coreAddress);
     }
 
-    /// @notice ThÃªm má»™t á»©ng viÃªn má»›i vÃ o danh sÃ¡ch
-    /// @param _name TÃªn á»©ng viÃªn
-    /// @param _party Äáº£ng phÃ¡i cá»§a á»©ng viÃªn
-    /// @param _description MÃ´ táº£ thÃªm
+    /// @notice Thêm một ứng viên mới vào danh sách
+    /// @param _name Tên ứng viên
+    /// @param _party Đảng phái của ứng viên
+    /// @param _description Mô tả thêm
     function addCandidate(string memory _name, string memory _party, string memory _description) public onlyAdmin candidatesNotLocked {
         uint _candidateId = candidates.length;
         candidates.push(Candidate({
@@ -83,11 +86,11 @@ contract CandidateManager {
         emit CandidateAdded(_candidateId, _name, _party);
     }
 
-    /// @notice Cáº­p nháº­t thÃ´ng tin cá»§a má»™t á»©ng viÃªn Ä‘Ã£ cÃ³
-    /// @param _id ID cá»§a á»©ng viÃªn
-    /// @param _newName TÃªn má»›i cá»§a á»©ng viÃªn
-    /// @param _newParty Äáº£ng phÃ¡i má»›i
-    /// @param _newDescription MÃ´ táº£ má»›i
+    /// @notice Cập nhật thông tin của một ứng viên đã có
+    /// @param _id ID của ứng viên
+    /// @param _newName Tên mới của ứng viên
+    /// @param _newParty Đảng phái mới
+    /// @param _newDescription Mô tả mới
     function updateCandidate(uint _id, string memory _newName, string memory _newParty, string memory _newDescription) public onlyAdmin candidatesNotLocked {
         require(_id < candidates.length, "Ung vien khong ton tai");
         require(candidates[_id].isActive, "Ung vien da bi xoa");
@@ -99,8 +102,8 @@ contract CandidateManager {
         emit CandidateUpdated(_id, _newName, _newParty);
     }
 
-    /// @notice XÃ³a má»m má»™t á»©ng viÃªn (áº©n Ä‘i chá»© khÃ´ng xÃ³a khá»i máº£ng)
-    /// @param _id ID cá»§a á»©ng viÃªn cáº§n xÃ³a
+    /// @notice Xóa mềm một ứng viên (ẩn đi chứ không xóa khỏi mảng)
+    /// @param _id ID của ứng viên cần xóa
     function deleteCandidate(uint _id) public onlyAdmin candidatesNotLocked {
         require(_id < candidates.length, "Ung vien khong ton tai");
         require(candidates[_id].isActive, "Ung vien da bi xoa roi");
@@ -109,17 +112,18 @@ contract CandidateManager {
         emit CandidateDeleted(_id);
     }
 
-    /// @notice KhÃ³a danh sÃ¡ch á»©ng viÃªn khÃ´ng cho thao tÃ¡c ná»¯a
-    /// @dev Cáº§n Ã­t nháº¥t 1 á»©ng viÃªn há»£p lá»‡ Ä‘á»ƒ khÃ³a
+    /// @notice Khóa danh sách ứng viên không cho thao tác nữa
+    /// @dev Cần ít nhất 1 ứng viên hợp lệ và đã setVotingCore, vì sau khi khóa không đổi Core được nữa
     function lockCandidates() public onlyAdmin candidatesNotLocked {
         require(getValidCandidatesCount() > 0, "Phai co it nhat 1 ung vien de khoa");
+        require(votingCoreAddress != address(0), "Phai setVotingCore truoc khi khoa");
         candidatesLocked = true;
 
         emit CandidatesLocked();
     }
 
-    /// @notice TÄƒng sá»‘ phiáº¿u báº§u cho á»©ng viÃªn (Chá»‰ dÃ nh cho Core)
-    /// @param _id ID cá»§a á»©ng viÃªn
+    /// @notice Tăng số phiếu bầu cho ứng viên (Chỉ dành cho Core)
+    /// @param _id ID của ứng viên
     function incrementVote(uint _id) public onlyCore {
         require(_id < candidates.length, "Ung vien khong ton tai");
         require(candidates[_id].isActive, "Ung vien khong hop le hoac bi xoa");
@@ -130,8 +134,8 @@ contract CandidateManager {
     // 8. View/pure functions
     // ==========================================
 
-    /// @notice Äáº¿m sá»‘ lÆ°á»£ng á»©ng viÃªn há»£p lá»‡
-    /// @return count Sá»‘ lÆ°á»£ng á»©ng viÃªn chÆ°a bá»‹ xÃ³a
+    /// @notice Đếm số lượng ứng viên hợp lệ
+    /// @return count Số lượng ứng viên chưa bị xóa
     function getValidCandidatesCount() public view returns (uint) {
         uint count = 0;
         for (uint i = 0; i < candidates.length; i++) {
@@ -142,16 +146,16 @@ contract CandidateManager {
         return count;
     }
 
-    /// @notice Láº¥y thÃ´ng tin cá»§a má»™t á»©ng viÃªn
-    /// @param _id ID cá»§a á»©ng viÃªn
-    /// @return Struct Candidate tÆ°Æ¡ng á»©ng
+    /// @notice Lấy thông tin của một ứng viên
+    /// @param _id ID của ứng viên
+    /// @return Struct Candidate tương ứng
     function getCandidate(uint _id) public view returns (Candidate memory) {
         require(_id < candidates.length, "Ung vien khong ton tai");
         return candidates[_id];
     }
 
-    /// @notice Láº¥y toÃ n bá»™ máº£ng á»©ng viÃªn
-    /// @return Máº£ng chá»©a táº¥t cáº£ Candidate structs
+    /// @notice Lấy toàn bộ mảng ứng viên
+    /// @return Mảng chứa tất cả Candidate structs
     function getAllCandidates() public view returns (Candidate[] memory) {
         return candidates;
     }

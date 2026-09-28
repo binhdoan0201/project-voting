@@ -50,10 +50,10 @@ contract VotingCore {
         require(electionScheduler.isElectionActive(), "Cuoc bau cu chua bat dau hoac da ket thuc");
         require(!hasVoted[msg.sender], "Ban da tham gia bau cu roi");
 
-        candidateManager.incrementVote(_candidateId);
-
         hasVoted[msg.sender] = true;
         totalVotesCast++;
+
+        candidateManager.incrementVote(_candidateId);
 
         emit Voted(msg.sender, _candidateId);
     }

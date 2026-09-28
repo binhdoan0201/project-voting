@@ -54,6 +54,8 @@ contract ElectionScheduler {
 
     /// @notice Cai dat dia chi cac contract khac de kiem tra du lieu truoc khi mo bau cu
     function setDependencies(address _candidateManager, address _voterRegistry) public onlyAdmin {
+        require(currentState() == ElectionState.NotStarted, "Khong the doi dependencies sau khi bau cu bat dau");
+        require(_candidateManager != address(0) && _voterRegistry != address(0), "Dia chi khong hop le");
         candidateManager = ICandidateManager(_candidateManager);
         voterRegistry = IVoterRegistry(_voterRegistry);
         emit DependenciesSet(_candidateManager, _voterRegistry);
@@ -71,9 +73,9 @@ contract ElectionScheduler {
     /// @notice Buoc 2: Admin bam de BAT DAU bau cu ngay lap tuc. Se tu dong ket thuc sau (electionDuration) giay.
     function startElection() public onlyAdmin {
         require(address(candidateManager) != address(0) && address(voterRegistry) != address(0), "Vui long setDependencies truoc");
+        require(candidateManager.candidatesLocked(), "Phai khoa danh sach ung vien (lockCandidates) truoc");
         require(candidateManager.getValidCandidatesCount() >= 1, "Phai co it nhat 1 ung vien de bau cu");
         require(voterRegistry.totalVoters() >= 1, "Phai co it nhat 1 cu tri de bau cu");
-        require(candidateManager.candidatesLocked(), "Danh sach ung vien chua duoc khoa");
         require(currentState() == ElectionState.NotStarted, "Cuoc bau cu da bat dau hoac da ket thuc");
         require(electionDuration > 0, "Vui long cai dat thoi luong (setElectionDuration) truoc");
 
@@ -100,7 +102,7 @@ contract ElectionScheduler {
         if (startTime == 0 || endTime == 0) {
             return ElectionState.NotStarted;
         }
-        if (block.timestamp >= startTime && block.timestamp <= endTime) {
+        if (block.timestamp >= startTime && block.timestamp < endTime) {
             return ElectionState.InProgress; // Dang trong khoang thoi gian cho phep
         }
         return ElectionState.Ended; // Da het thoi luong hoac bi Admin tat som
