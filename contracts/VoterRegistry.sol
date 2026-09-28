@@ -10,6 +10,7 @@ contract VoterRegistry {
     uint256 public totalVoters;
 
     event VoterRegistered(address indexed voter);
+    event VoterRemoved(address indexed voter);
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "Chi admin moi duoc thuc hien");
@@ -71,6 +72,16 @@ contract VoterRegistry {
         registeredVoters[_voter] = true;
         totalVoters++;
         emit VoterRegistered(_voter);
+    }
+
+    /// @notice Admin go mot cu tri da dang ky nham (chi truoc khi bau cu bat dau).
+    /// @param _voter Dia chi vi cua cu tri can go.
+    function removeVoter(address _voter) external onlyAdmin onlyBeforeElection {
+        require(registeredVoters[_voter], "Cu tri chua duoc dang ky");
+
+        registeredVoters[_voter] = false;
+        totalVoters--;
+        emit VoterRemoved(_voter);
     }
 
     /// @notice Kiem tra dia chi da duoc dang ky hay chua.
