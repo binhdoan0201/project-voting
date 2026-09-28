@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 interface ICandidateManager {
     function getValidCandidatesCount() external view returns (uint);
+    function candidatesLocked() external view returns (bool);
 }
 
 interface IVoterRegistry {
@@ -72,6 +73,7 @@ contract ElectionScheduler {
         require(address(candidateManager) != address(0) && address(voterRegistry) != address(0), "Vui long setDependencies truoc");
         require(candidateManager.getValidCandidatesCount() >= 1, "Phai co it nhat 1 ung vien de bau cu");
         require(voterRegistry.totalVoters() >= 1, "Phai co it nhat 1 cu tri de bau cu");
+        require(candidateManager.candidatesLocked(), "Danh sach ung vien chua duoc khoa");
         require(currentState() == ElectionState.NotStarted, "Cuoc bau cu da bat dau hoac da ket thuc");
         require(electionDuration > 0, "Vui long cai dat thoi luong (setElectionDuration) truoc");
 
